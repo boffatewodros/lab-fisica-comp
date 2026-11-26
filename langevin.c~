@@ -1,0 +1,115 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct {
+    double x, v;
+} Punto;
+
+typedef struct {
+    double dt, gamma, kT;
+} Cost;
+
+double gaussian() {
+
+    double u1 = 1.0 - drand48();
+    double u2 = drand48();
+
+    return sqrt(-2.0*log(u1))
+         * cos(2.0*acos(-1.0)*u2);
+}
+
+void passo(Punto *s, Cost *sist) {
+
+    double dt = sist->dt;
+
+    // TODO 3: genera un numero gaussiano R
+
+    // TODO 4: aggiorna la posizione con Eulero
+
+    // TODO 5: aggiorna la velocita'
+    // considerando attrito e termine casuale
+
+}
+
+void misura(Punto *s, int nwalks, double t) {
+
+    double media = 0;
+    double msd = 0;
+
+    for (int j = 0; j < nwalks; j++) {
+
+        // TODO 6: somma le posizioni
+
+        // TODO 7: somma i quadrati
+
+    }
+
+    // TODO 8: calcola le medie
+
+    printf("%.10e %.10e %.10e\n", t, media, msd);
+}
+
+int main(int argc, char *argv[]) {
+
+    if (argc != 9) {
+        printf("Uso: dt nsteps stride nwalks v0 gamma kT seed\n");
+        return 1;
+    }
+
+    Cost sist;
+
+    sist.dt = atof(argv[1]);
+
+    int nsteps = atoi(argv[2]);
+    int stride = atoi(argv[3]);
+    int nwalks = atoi(argv[4]);
+
+    double v0 = atof(argv[5]);
+
+    sist.gamma = atof(argv[6]);
+    sist.kT = atof(argv[7]);
+
+    int seed = atoi(argv[8]);
+
+    if (sist.dt <= 0 || nsteps < 0 || stride <= 0 ||
+        nwalks <= 0 || sist.gamma <= 0 || sist.kT < 0) {
+        return 1;
+    }
+
+    double t = 0;
+
+    Punto *s = malloc(nwalks * sizeof(Punto));
+
+    if (s == NULL) return 1;
+
+    srand48(seed);
+
+    // Condizioni iniziali
+    for (int j = 0; j < nwalks; j++) {
+        s[j].x = 0;
+        s[j].v = v0;
+    }
+
+    // Stampa iniziale
+    misura(s, nwalks, t);
+
+    // Ciclo temporale
+    for (int i = 1; i <= nsteps; i++) {
+
+        for (int j = 0; j < nwalks; j++) {
+            passo(&s[j], &sist);
+        }
+
+        t += sist.dt;
+
+        if (i % stride == 0) {
+            misura(s, nwalks, t);
+        }
+    }
+
+    free(s);
+
+    return 0;
+}

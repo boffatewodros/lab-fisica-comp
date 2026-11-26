@@ -1,0 +1,105 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct {
+    double x;
+} Punto;
+
+void passo(Punto *s) {
+
+   
+double r = drand48(); // Estrae un numero tra 0 e 1
+   
+if (r < 0.5)
+    s->x += 1.0;
+else
+    s->x -= 1.0;
+}
+
+void misura(Punto *s, int nwalks, double t) {
+
+    double media = 0;
+    double msd = 0;
+
+    for (int j = 0; j < nwalks; j++) {
+
+       media += s[i].x;
+    msd += s[i].x * s[i].x;
+    }
+
+
+
+    media /= nwalks;
+    msd /= nwalks;
+
+
+    printf("%.10e %.10e %.10e\n", t, media, msd);
+}
+
+int main(int argc, char *argv[]) {
+
+  if (argc != 6) {
+    printf("Uso: nsteps stride nwalks seed config\n");
+    return 1;
+  }
+
+  int nsteps = atoi(argv[1]);
+  int stride = atoi(argv[2]);
+  int nwalks = atoi(argv[3]);
+  int seed = atoi(argv[4]);
+  int config = atoi(argv[5]);
+  srand48(seed);
+  
+  if (nsteps < 0 || stride <= 0 || nwalks <= 0 ||
+      (config != 0 && config != 1)) {
+    return 1;
+  }
+
+  double t = 0;
+
+  Punto *s = malloc(nwalks * sizeof(Punto));
+
+  if (s == NULL){
+    return 1;
+  }
+
+
+
+  // Condizioni iniziali
+  for (int j = 0; j < nwalks; j++) {
+    s[j].x = 0;
+  }
+
+  // Stampa iniziale
+  if (config == 0) {
+    misura(s, nwalks, t);
+  }
+
+  // Ciclo temporale
+  for (int i = 1; i <= nsteps; i++) {
+
+    // Ciclo sui camminatori
+    for (int j = 0; j < nwalks; j++) {
+      passo(&s[j]);
+    }
+
+    t += 1;
+
+    if (config == 0 && i % stride == 0) {
+      misura(s, nwalks, t);
+    }
+  }
+
+  // Stampa posizioni finali
+  if (config == 1) {
+    for (int j = 0; j < nwalks; j++) {
+      printf("%.10e\n", s[j].x);
+    }
+  }
+
+  free(s);
+
+  return 0;
+}

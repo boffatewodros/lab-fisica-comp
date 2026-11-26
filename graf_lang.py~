@@ -1,0 +1,74 @@
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+t1, media1, msd1 = np.loadtxt("lang11.dat", unpack=True)
+t2, media2, msd2 = np.loadtxt("lang21.dat", unpack=True)
+t3, media3, msd3 = np.loadtxt("lang05.dat", unpack=True)
+t4, media4, msd4 = np.loadtxt("lang12.dat", unpack=True)
+
+# Regime balistico e diffusivo
+plt.figure()
+plt.loglog(t1[1:], msd1[1:], label="Simulazione")
+plt.loglog(t1[1:], t1[1:]**2, "--", label="Balistico")
+plt.loglog(t1[1:], 2*t1[1:], "--", label="Diffusivo")
+plt.xlabel("Tempo")
+plt.ylabel("MSD")
+plt.title("Langevin - Regimi del moto")
+plt.legend()
+plt.grid()
+plt.savefig("regimi_langevin.png")
+
+# Fit lineari nel regime diffusivo
+
+# gamma = 1, kT = 1
+m1, q1 = np.polyfit(t1[t1 >= 10], msd1[t1 >= 10], 1)
+
+# gamma = 2, kT = 1
+m2, q2 = np.polyfit(t2[t2 >= 5], msd2[t2 >= 5], 1)
+
+# gamma = 0.5, kT = 1
+m3, q3 = np.polyfit(t3[t3 >= 20], msd3[t3 >= 20], 1)
+
+# gamma = 1, kT = 2
+m4, q4 = np.polyfit(t4[t4 >= 10], msd4[t4 >= 10], 1)
+
+# Coefficienti di diffusione
+D1 = m1/2
+D2 = m2/2
+D3 = m3/2
+D4 = m4/2
+
+print("D1 =", D1, "Teorico = 1")
+print("D2 =", D2, "Teorico = 0.5")
+print("D3 =", D3, "Teorico = 2")
+print("D4 =", D4, "Teorico = 2")
+
+# Relazione di Einstein
+D_teorico = np.array([1, 0.5, 2, 2])
+D_misurato = np.array([D1, D2, D3, D4])
+
+plt.figure()
+plt.plot(D_teorico, D_misurato, "o", label="Simulazioni")
+plt.plot([0, 2.2], [0, 2.2], "--", label="Teoria")
+plt.xlabel("kT/gamma")
+plt.ylabel("D misurato")
+plt.title("Relazione di Einstein")
+plt.legend()
+plt.grid()
+plt.savefig("einstein.png")
+
+# Confronto random walk e Langevin
+t, media, msd = np.loadtxt("rw.dat", unpack=True)
+
+plt.figure()
+plt.loglog(t[1:], msd[1:], label="Random walk")
+plt.loglog(t1[1:], msd1[1:], label="Langevin")
+plt.xlabel("Tempo")
+plt.ylabel("MSD")
+plt.title("Confronto random walk e Langevin")
+plt.legend()
+plt.grid()
+plt.savefig("confronto.png")
+
+plt.show()
